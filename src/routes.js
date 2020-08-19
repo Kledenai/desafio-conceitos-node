@@ -10,6 +10,7 @@ routes.get('/repositories/:id', RepositoryController.show);
 routes.put('/repositories/:id', RepositoryController.update);
 routes.delete('/repositories/:id', RepositoryController.delete);
 
-routes.post('/repositories/:id/like', LikeController.store);
+routes.post('/repositories/:id/like', LikeController.like);
+routes.post('/repositories/:id/deslike', LikeController.deslike);
 
 module.exports = routes;

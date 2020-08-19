@@ -1,7 +1,7 @@
-const { v4: uuid } = require('uuid');
+const { uuid } = require('uuidv4');
 
 module.exports = {
-  async index (request, response) {
+  index (request, response) {
     const { title } = request.query;
 
     const repositories = request.app.get('repositories');
@@ -10,27 +10,32 @@ module.exports = {
       ? repositories.filter(repository => repository.title.includes(title))
       : repositories;
 
-    return response.status(200).json(result);
+    return response.json(result);
   },
 
-  async store (request, response) {
+  store (request, response) {
     const { title, url, techs } = request.body;
+    const likes = 0
 
     const repositories = request.app.get('repositories');
 
-    const repository = { id: uuid(), title, url, techs, like: 0 };
+    const repository = {
+      id: uuid(),
+      title, url,
+      techs,
+      likes
+    };
 
-    await repositories.push(repository);
-
-    return response.status(201).json(repository);
+    repositories.push(repository);
+    return response.json(repository);
   },
 
-  async show (request, response) {
+  show (request, response) {
     const { id } = request.params;
 
     const repositories = request.app.get('repositories');
 
-    const repository = await repositories.find(repository => repository.id === id);
+    const repository = repositories.find(repository => repository.id === id);
 
     if (repository < 0) {
       return response.status(400).json({ message: 'Repository not found.' });
@@ -39,16 +44,16 @@ module.exports = {
     return response.json(repository);
   },
 
-  async update (request, response) {
+  update (request, response) {
     const { id } = request.params;
-    const { title, url, techs } = request.body;
+    const { title, techs, url } = request.body;
 
     const repositories = request.app.get('repositories');
 
-    const repositoryIndex = await repositories.findIndex(repository => repository.id === id);
+    const repositoryIndex = repositories.findIndex(repository => repository.id === id);
 
     if(repositoryIndex < 0) {
-      return response.status(400).json({ message: 'Project not found.' });
+      return response.status(400).json({ error: 'Repository not found.'});
     }
 
     const repository = {
@@ -56,26 +61,30 @@ module.exports = {
       title,
       url,
       techs,
-    };
+      likes: repositories[repositoryIndex].likes,
+    }
+
+    console.log(repository.likes)
+
 
     repositories[repositoryIndex] = repository
 
-    return response.json(project);
+    return response.json(repository);
   },
 
-  async delete (request, response) {
+  delete (request, response) {
     const { id } = request.params;
 
     const repositories = request.app.get('repositories');
 
     const repositoryIndex = repositories.findIndex(repository => repository.id === id);
 
-    if (repositoryIndex < 0) {
-      return response.status(400).json({ message: 'Project not found.' });
+    if(repositoryIndex < 0) {
+      return response.status(400).json({ error: 'Repository not found.'});
     }
 
     repositories.splice(repositoryIndex, 1);
 
-    return response.json({ message: 'Repository deleted successfuly' });
+    return response.status(204).send();
   }
 };
