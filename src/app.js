@@ -1,7 +1,6 @@
 const express = require("express");
 const cors = require("cors");
-
-// const { v4: uuid } = require('uuid');
+const { v4: uuid } = require('uuid');
 
 const app = express();
 
@@ -11,11 +10,23 @@ app.use(cors());
 const repositories = [];
 
 app.get("/repositories", (request, response) => {
-  // TODO
+  const { title } = request.query;
+
+  const result = title
+    ? repositories.filter(repository => repository.title.includes(title))
+    : repositories;
+
+  return response.json(result);
 });
 
 app.post("/repositories", (request, response) => {
-  // TODO
+  const { title, url, techs } = request.body;
+
+  const repository = { id: uuid(), title, url, techs, like: 0 };
+
+  repositories.push(repository);
+
+  return response.json(repository);
 });
 
 app.put("/repositories/:id", (request, response) => {
